@@ -68,7 +68,7 @@ chmod 666 /run/user/1000/podman/podman.sock
 
 ## Run stack
 ```bash
-sudo podman-compose -f compose.yaml up -d
+podman compose -f compose.yaml up -d
 ```
 
 ## grafana ui
