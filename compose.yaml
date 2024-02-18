@@ -4,6 +4,7 @@ services:
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     hostname: node_exporter
+    container_name: node_exporter
     networks:
       - monitoring
     pid: host
@@ -15,20 +16,22 @@ services:
   grafana:
     image: grafana/grafana:latest
     hostname: grafana
+    container_name: grafana
     networks:
       - monitoring
-    depends_on:
-      - prometheus
+#    depends_on:
+#      - prometheus
     ports:
       - "3000:3000" # Expose port 3000 on the host
 
   podman_exporter:
     image: quay.io/navidys/prometheus-podman-exporter
     hostname: podman_exporter
+    container_name: podman_exporter
     environment:
       - CONTAINER_HOST=unix:///run/podman/podman.sock
     volumes:
-      - /run/podman/podman.sock:/run/podman/podman.sock:ro
+      - /run/user/1000/podman/podman.sock:/run/podman/podman.sock:ro
     networks:
       - monitoring  # ports: - 9882:9882
     command:
@@ -38,13 +41,14 @@ services:
   prometheus:
     image: docker.io/prom/prometheus
     hostname: prometheus
+    container_name: prometheus
     networks:
       - monitoring
     depends_on:
       - podman_exporter
       - node_exporter
     volumes:
-      - /home/sp/prometheus:/etc/prometheus
+      - ./prometheus:/etc/prometheus
 
 networks:
   monitoring:
