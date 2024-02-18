@@ -7,7 +7,8 @@ sudo chmod 666 /run/podman/podman.sock
 ```
 
 ```bash
-podman system service --time=0 unix:///run/user/1000/podman/podman.sock &
+podman system service --time=0 unix:///run/user/1000/podman/podman.sock
+chmod 666 /run/user/1000/podman/podman.sock
 ```
 
 ## Run stack
