@@ -19,8 +19,8 @@ services:
     container_name: grafana
     networks:
       - monitoring
-#    depends_on:
-#      - prometheus
+    depends_on:
+      - prometheus
     ports:
       - "3000:3000" # Expose port 3000 on the host
 
