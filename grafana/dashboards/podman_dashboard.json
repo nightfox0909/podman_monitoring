@@ -133,7 +133,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "podman_container_info \n * on (id) group_left(state)\npodman_container_state",
+          "expr": "sum by(name) (podman_container_info * on(id) group_right(name) podman_container_state)",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
