@@ -3,6 +3,10 @@ This is a podman & node monitoring stack fully based off on conda and does not r
 1. https://github.com/containers/prometheus-podman-exporter
 2. https://github.com/prometheus/node_exporter
 
+Uses the following awesome dashboards
+1. https://grafana.com/grafana/dashboards/1860-node-exporter-full
+2. https://github.com/containers/prometheus-podman-exporter
+
 This repo and stack is designed to work out of the box and provide an quick initial dashboard. It automatically sets up the exporters, configures prometheus and points grafana at it. 
 
 ## Step 1: Install podman
