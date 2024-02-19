@@ -30,8 +30,48 @@ helper_binaries_dir = [
 ]
 ```
 
-### change network backend to netavark
+### Change network backend to netavark
 The default CNI network stack does not have dns resolution. To enable this, we need to install netavark. 
+
+#### Option 1 : Build netavark and aadvark-dns
+This method requires sudo permissions to install build dependencies. You could build for a target machine and then deploy the binaries without sudo. Alternatively you can use Option 2 if you have glibc version 2.32 and above. 
+
+Install pre-requisites
+1. Rustc
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+```
+2. Deps
+```bash
+sudo apt-get install build-essential protobuf-compiler
+```
+3. Clone and build netavark
+```bash
+git clone https://github.com/containers/netavark.git
+cd netavark
+make
+mv bin/netavark /home/sp/miniconda3/libexec/podman/
+```
+5. Clone and build aadvark-dns
+```bash
+git clone https://github.com/containers/aardvark-dns.git
+cd aardvark-dns
+make
+mv bin/aardvark-dns /home/sp/miniconda3/libexec/podman/
+```
+
+#### Option 2: Download builds directly
+```bash
+wget https://github.com/containers/netavark/releases/download/v1.10.3/netavark.gz
+gzip -d netavark.gz
+chmod +x netavark
+mv netavark /home/sp/miniconda3/libexec/podman/
+wget wget https://github.com/containers/aardvark-dns/releases/download/v1.10.0/aardvark-dns.gz
+gzip -d aardvark-dns.gz
+chmod +x aardvark-dns
+mv aardvark-dns /home/sp/miniconda3/libexec/podman/
+```
 
 edit network_engine in /home/sp/miniconda3/share/containers/containers.conf
 ```bash
@@ -39,22 +79,8 @@ edit network_engine in /home/sp/miniconda3/share/containers/containers.conf
 network_backend = "netavark"
 ```
 
-download netavark and aadvark-dns to /home/sp/miniconda3/libexec/podman
-```bash
-wget https://github.com/containers/netavark/releases/download/v1.10.3/netavark.gz
-gzip -d netavark.gz
-chmod +x netavark
-mv netavark /home/sp/miniconda3/libexec/podman/
-```
-
-```bash
-wget wget https://github.com/containers/aardvark-dns/releases/download/v1.10.0/aardvark-dns.gz
-gzip -d aardvark-dns.gz
-chmod +x aardvark-dns
-mv aardvark-dns /home/sp/miniconda3/libexec/podman/
-```
-
-reset podman. This step is destructive and removes all existing images, containers and networks. Proceed only after backups are created.
+### Reset podman
+This step is destructive and removes all existing images, containers and networks. Proceed only after backups are created.
 ```bash
 podman system reset --force
 ```
