@@ -23,6 +23,8 @@ services:
       - prometheus
     ports:
       - "3000:3000" # Expose port 3000 on the host
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/
 
   podman_exporter:
     image: quay.io/navidys/prometheus-podman-exporter
