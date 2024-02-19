@@ -1,6 +1,6 @@
 [Unit]
 Description=Podman API Service
-Requries=podman.socket
+Requires=podman.socket
 After=podman.socket
 Documentation=man:podman-system-service(1)
 StartLimitIntervalSec=0
@@ -8,8 +8,7 @@ StartLimitIntervalSec=0
 [Service]
 Type=exec
 KillMode=process
-User=sp
 Environment=LOGGING="--log-level=info"
 Environment=PATH="/home/sp/miniconda3/bin:/usr/bin:$PATH"
 Environment=TMPDIR="/shared/tmp"
-ExecStart=/home/sp/miniconda3/bin/podman system service $LOGGING
+ExecStart=/home/sp/miniconda3/bin/podman system service $LOGGING --timeout 0
