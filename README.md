@@ -1,9 +1,11 @@
 # podman_monitoring
-This is a podman stack fully based off on conda and does not require sudo permissions
+This is a podman & node monitoring stack fully based off on conda and does not require sudo permissions. It uses two prometheus exporters
+1. https://github.com/containers/prometheus-podman-exporter
+2. https://github.com/prometheus/node_exporter
 
-current issues : podman socket needs to be made into a systemd process. right now, the socket process must be kept open while the stack runs. 
+This repo and stack is designed to work out of the box and provide an quick initial dashboard. It automatically sets up the exporters, configures prometheus and points grafana at it. 
 
-## install podman
+## Step 1: Install podman
 configure conda channels
 
 ```bash
@@ -17,8 +19,8 @@ conda install podman
 ```
 restart your current terminal. 
 
-## configure podman
-### Add helper binaries folder to find rootlessport
+## Step 2: Configure podman
+### 2.1 Add helper binaries folder to find rootlessport
 When it starts first, podman will have issues finding rootlessport since its not on the PATH. To fix this, 
 Edit  /home/sp/miniconda3/share/containers/containers.conf
 
@@ -30,10 +32,16 @@ helper_binaries_dir = [
 ]
 ```
 
-### Change network backend to netavark
+### 2.2 Change network backend to netavark
+First, check what is the current network backend.
+```bash
+podman info | grep networkBackend
+```
+**If you see cni, continue with the steps below. If you see netavark, skip this step as you already have the correct backend and pick up from enable podman socket section**
+
 The default CNI network stack does not have dns resolution. To enable this, we need to install netavark. 
 
-#### Option 1 : Build netavark and aadvark-dns
+#### 2.2.1 Option 1 : Build netavark and aadvark-dns
 This method requires sudo permissions to install build dependencies. You could build for a target machine and then deploy the binaries without sudo. Alternatively you can use Option 2 if you have glibc version 2.32 and above. 
 
 Install pre-requisites
@@ -61,7 +69,7 @@ make
 mv bin/aardvark-dns /home/sp/miniconda3/libexec/podman/
 ```
 
-#### Option 2: Download builds directly
+#### 2.2.2 Option 2: Download builds directly
 ```bash
 wget https://github.com/containers/netavark/releases/download/v1.10.3/netavark.gz
 gzip -d netavark.gz
@@ -73,29 +81,37 @@ chmod +x aardvark-dns
 mv aardvark-dns /home/sp/miniconda3/libexec/podman/
 ```
 
+### 2.3 Change default engine from cni to netavark
 edit network_engine in /home/sp/miniconda3/share/containers/containers.conf
 ```bash
 [network]
 network_backend = "netavark"
 ```
 
-### Reset podman
+### 2.4 Reset podman
 This step is destructive and removes all existing images, containers and networks. Proceed only after backups are created.
 ```bash
 podman system reset --force
 ```
 
-## Enable podman socket
+## Step 3: Enable podman socket
 A socket is how the podman monitoring component communicates with the containers and images. Since podman is daemonless, we need to create this socket and give read permissions on it.
+
+To do this, we first setup some systemd services. copy the systemd files from the folder systemd to /usr/lib/systemd/user/
 ```bash
-podman system service --time=0 unix:///run/user/1000/podman/podman.sock
-chmod 666 /run/user/1000/podman/podman.sock
+cp systemd/. /usr/lib/systemd/user/
+```
+enable the new files and enable the podman listener socket.
+```bash
+systemctl --user daemon-reload
+systemctl --user start podman.socket
 ```
 
-## Run stack
+## Step 4: Run stack
 ```bash
 podman compose -f compose.yaml up -d
 ```
 
-## grafana ui
-<IP>:3000
+## Step 5: View grafana ui
+You are all done and can view the dashboard at the link below. 
+IP_ADDRESS_OF_MAACHINE:3000
