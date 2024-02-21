@@ -99,11 +99,14 @@ podman system reset --force
 ```
 
 ## Step 3: Enable podman socket
+[!NOTE]
+Please edit the systemd files before copying them into your machine. currently the user is sp. 
+
 A socket is how the podman monitoring component communicates with the containers and images. Since podman is daemonless, we need to create this socket and give read permissions on it.
 
 To do this, we first setup some systemd services. copy the systemd files from the folder systemd to /usr/lib/systemd/user/
 ```bash
-cp systemd/. /usr/lib/systemd/user/
+sudo cp -r systemd/. /usr/lib/systemd/user/
 ```
 enable the new files and enable the podman listener socket.
 ```bash
